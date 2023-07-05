@@ -12,8 +12,9 @@ workspace root directory consists of the following:
 
 - `packages/` - directory containing all installed mps4c packages
   - _(directories with the same name as each package)_
+    - `build/` - build related files, such as shell scripts
+    - `include/` - directory including **PUBLIC** header files
     - `src/` - directory including source files
-    - `build/` - build related files
     - `.package.ft` - indicates current directory is root of the package
     - `dependencies.ft` - list of dependent packages
     - `Makefile` - recipes to build the package
