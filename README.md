@@ -4,6 +4,8 @@
 
 ## Workspace
 
+Every project, build cache, installed packages, ... will be stored in workspace.
+
 `.workspace.ft` file indicates current directory is root of the workspace.
 
 ### Directory Structure
@@ -23,26 +25,42 @@ workspace root directory consists of the following:
     - `modules/` - directory containing modules in the project (package)
       - _(any depth of directories, **MAY NOT CONTAIN OTHER FILES**)_
         - _(module directory name)_ - [see _Module directory name_ below](#module-directory-name)
+          - modules files, depending on [module type](#module-type)
     - `.project.ft` - indicates current directory is root of the project
     - `Makefile` - recipe to build the `package` directory in form above
     - ... and more like `.editorconfig`, `.gitignore`, `compile_flags.txt`, ...
 - `tmp/` - temporary directory for all packages/projects
 - `.workspace.ft` - indicates current directory is root of the workspace
 
+## `mps4c` command
+
+The `mps4c` command has functions to handle workspaces, projects, ... etc.
+
+### Activating
+
+Some mps4c implementation may require to activate the command.
+
+Way to activate the command depends on the implementation.
+
 ### Init workspace
 
-using mps4c cli
+You can init the workspace to existing, empty directory using command below.
 
 ```shell
 mps4c init
+# or
+mps4c -C /path/to/workspace/directory init
 ```
 
-or manually configure
+### Clean workspace
 
-```shell
-mkdir -p packages projects tmp
-touch .workspace.ft
-```
+`mps4c clean` removes cache for the implementation
+
+(each implementation must have its own cache directory)
+
+`mps4c fclean` removes entire cache and even output files.
+
+### Build
 
 ## Module
 
@@ -80,13 +98,13 @@ The module is one of the three below:
 
 Module name is concatenated form of two parts separated by double underscores(`__`).
 
-The two parts are _package name_ which is required and _module name part_ which is optional.
+The two parts are [_package name part_](#package-name) which is required and _module name part_ which is optional.
 
 The _Word_ consists of lowercase letters and digits. (`[a-z0-9]`)
 
-The _Word_ can't contain consecutive underscores, or begin with a digit.
-
 The _module name part_ is one or more _Word_ separated by underscore(`_`).
+
+But _package name part_ has extra constraint: can't starts with digit.
 
 If the package name is `ft_args`, the module name can be `ft_args` or `ft_args__free`.
 
@@ -102,8 +120,8 @@ In this case, the module requires module with ANY edition with given module name
 
 Header module has two files:
 
-- `dependencies.ft` - list of **DIRECTLY** included header module
-- _(module name)_`.h` - actual content of the header module
+- `dependencies.ft` - list of **DIRECTLY** included header module (optional)
+- _(module name)_`.h` - actual content of the header module (required)
 
 Indirectly included header modules will be loaded automatically. Don't worry!
 
@@ -112,9 +130,9 @@ Indirectly included header modules will be loaded automatically. Don't worry!
 Source module has two files:
 
 - `dependencies_lib.ft` - list of name of libraries which will called (optional)
-- `dependencies.ft` - list of included module and called&&exact function.
-- `peer_dependencies.ft` - list of called function modules' name
-- _(module name)_`.c` - actual content of the source module
+- `dependencies.ft` - list of included / called(exact) modules (exact) (optional)
+- `peer_dependencies.ft` - list of called function modules' name (optional)
+- _(module name)_`.c` - actual content of the source module (required)
 
 A source module must have _**ONLY ONE** non-static function_ to keep it searchable.
 
@@ -145,11 +163,46 @@ If the package name is `ft_args`, the directory name can be `h.`, `s.alloc.w`, `
 - `h./` - include `ft_args.h`
 - `s.alloc.w/` - include `ft_args__alloc.c`
 
+## Testing
+
+Some test could need mocked functions for external packages.
+
+mps4c provides easy way to mock test using existing [mock packages](#mock-package).
+
 ## Package
 
 Each package has executables, libraries, and source files
 
-## Future Plans
+### Package type
+
+The package is one of the two below:
+
+- Normal package which including libraries and/or executables
+- Mock package for testing purpose which including libraries
+
+If the package name contains [_package name part_](#package-name), then the package is Mock package.
+
+### Package name
+
+Package name is concatenated form of two parts separated by period(`.`).
+
+The two parts are _package name part_ which is required and and _package edition part_.
+
+_package name part_ / _package edition part_ are one or more _Word_ separated by underscore(`_`).
+
+But _package name part_ has extra constraint: can't starts with digit.
+
+If some Mock package is for Normal package `memory`,
+
+Possible names for the Mock package are: `memory.branch`, `memory.leak` and so on.
+
+### Normal package
+
+// TODO:
+
+### Mock package
+
+## Future plans
 
 - remove _package name prefix_ (auto prefix)
 - remove dependency file (auto collect dependencies from source code)
