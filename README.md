@@ -60,7 +60,25 @@ mps4c -C /path/to/workspace/directory init
 
 `mps4c fclean` removes entire cache and even output files.
 
-### Build
+### Build flags
+
+Print include directory parameter, like `-I include -I /workspace/tmp/include`
+
+```shell
+$CC -o $TARGET $CPPFLAGS $(mps4c include_directories) $CFLAGS -c $SOURCE
+```
+
+Print library directory parameter, like `-L ../../lib -L /workspace/tmp/lib`
+
+```shell
+$CC -o out.exe $LDFLAGS $(mps4c library_directories) $OBJS $LDLIBS
+```
+
+Print libraries to link, in correct topological order, like `$(LDLIBS)`
+
+```shell
+$CC -o out.exe $LDFLAGS $OBJS $(mps4c ldlibs)
+```
 
 ## Module
 
@@ -104,9 +122,11 @@ The _Word_ consists of lowercase letters and digits. (`[a-z0-9]`)
 
 The _module name part_ is one or more _Word_ separated by underscore(`_`).
 
-But _package name part_ has extra constraint: can't starts with digit.
+If the package name is `ft_args`, possible module name can be like below:
 
-If the package name is `ft_args`, the module name can be `ft_args` or `ft_args__free`.
+- `ft_args`
+- `ft_args__free`
+- `ft_args__get_map`
 
 ### Module edition
 
@@ -120,6 +140,7 @@ In this case, the module requires module with ANY edition with given module name
 
 Header module has two files:
 
+- `dependencies_lib.ft` - list of library name contains **DIRECTLY** included header (optional)
 - `dependencies.ft` - list of **DIRECTLY** included header module (optional)
 - _(module name)_`.h` - actual content of the header module (required)
 
@@ -144,6 +165,8 @@ Sometimes, some dependencies may be required in a lot of modules.
 
 To prevent list all dependencies in a lot of modules, you can use the bundle module.
 
+Bundle module has only one file: `dependencies.ft` - list of dependencies to bundle
+
 ### Module directory name
 
 Module directory name is concatenated form of three parts separated by dot(`.`).
@@ -158,16 +181,12 @@ The second part is _module name part_ above
 
 The third part is module edition name which is optional.
 
-If the package name is `ft_args`, the directory name can be `h.`, `s.alloc.w`, `b.a.w`
+If the package name is `ft_args`, the directory name can be like below:
 
 - `h./` - include `ft_args.h`
-- `s.alloc.w/` - include `ft_args__alloc.c`
-
-## Testing
-
-Some test could need mocked functions for external packages.
-
-mps4c provides easy way to mock test using existing [mock packages](#mock-package).
+- `s./` - include `ft_args.c`
+- `h.internal/` - include `ft_args__internal.h`
+- `s.get_map` - include `ft_args__get_map.c`
 
 ## Package
 
