@@ -2,9 +2,17 @@
 
 `mps4c` is module/package system for C
 
+- Package management
+  - Install/remove package
+  - Dependency management
+- Build system integration
+  - Arguments for `cc` command
+- Environment isolation
+  - Virtual environments
+
 ## Workspace
 
-Every project, build cache, installed packages, ... will be stored in workspace.
+Every installed packages, ... will be stored in workspace `.mps4c` directory.
 
 `.workspace.ft` file indicates current directory is root of the workspace.
 
@@ -12,25 +20,16 @@ Every project, build cache, installed packages, ... will be stored in workspace.
 
 workspace root directory consists of the following:
 
-- `packages/` - directory containing all installed mps4c packages
-  - _(directories with the same name as each package)_
-    - `build/` - build related files, such as shell scripts
-    - `include/` - directory including **PUBLIC** header files
-    - `src/` - directory including source files
-    - `.package.ft` - indicates current directory is root of the package
-    - `dependencies.ft` - list of dependent packages
-    - `Makefile` - recipes to build the package
-- `projects/` - directory containing your repositories
-  - _(any depth of directories, may contain any other files)_
-    - `modules/` - directory containing modules in the project (package)
-      - _(any depth of directories, **MAY NOT CONTAIN OTHER FILES**)_
-        - _(module directory name)_ - [see _Module directory name_ below](#module-directory-name)
-          - modules files, depending on [module type](#module-type)
-    - `.project.ft` - indicates current directory is root of the project
-    - `Makefile` - recipe to build the `package` directory in form above
-    - ... and more like `.editorconfig`, `.gitignore`, `compile_flags.txt`, ...
-- `tmp/` - temporary directory for all packages/projects
+- `.mps4c/` - temporary directory for all packages/projects
 - `.workspace.ft` - indicates current directory is root of the workspace
+- _(any depth of directories, may contain any other files)_
+  - `modules/` - directory containing modules in the project (package)
+    - _(any depth of directories, **MAY NOT CONTAIN OTHER FILES**)_
+      - _(module directory name)_ - [see _Module directory name_ below](#module-directory-name)
+        - modules files, depending on [module type](#module-type)
+  - `.project.ft` - indicates current directory is root of the project
+  - `Makefile` - recipe to build the `package` directory in form above
+  - ... and whatever you'd like
 
 ## `mps4c` command
 
@@ -56,7 +55,7 @@ mps4c -C /path/to/workspace/directory init
 
 `mps4c clean` removes cache for the implementation
 
-(each implementation must have its own cache directory)
+(each implementation must have its own cache directory in the `.mps4c` directory)
 
 `mps4c fclean` removes entire cache and even output files.
 
@@ -220,6 +219,18 @@ Possible names for the Mock package are: `memory.branch`, `memory.leak` and so o
 // TODO:
 
 ### Mock package
+
+## `.ft` file format
+
+Just like `*.properties` files, list `KEY=VALUE` line by line (without spaces/quotes)
+
+### `.workspace.ft`
+
+File to indicate workspace root
+
+- `useGlobal` - whether use `~/.mps4c` or `./mps4c` as internal cache directory
+
+### `.package.ft`
 
 ## Future plans
 
